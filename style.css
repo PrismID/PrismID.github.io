@@ -1,0 +1,204 @@
+/* style.css */
+
+/* Custom smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+img {
+    border-radius: 20px;
+    transition: transform 0.3s ease;
+}
+
+#Login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+    #Voxu h5 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        margin-left: 80px !important;
+    }
+
+    #WhiteboardWonders h5 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        margin-left: 20px !important;
+    }
+    /* Custom Webkit Scrollbar for the dark theme */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #0f172a; /* Tailwind slate-900 */
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #334155; /* Tailwind slate-700 */
+        border-radius: 4px;
+    }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; /* Tailwind slate-600 */
+        }
+    /* A custom animation for the loading text */
+    .pulse-anim {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    #loading-overlay {
+position: fixed;
+right: 0;
+bottom: 0;
+min-width: 100%;
+min-height: 100%;
+width: auto;
+height: auto;
+z-index: -100;
+object-fit: cover;
+}
+
+/* Reset the body margin so the bar touches the edges of the screen */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9; /* Light background for the rest of the page */
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between; /* Pushes the two inner divs to opposite ends */
+    align-items: center; /* Vertically centers the text and images */
+    background-color: #1a1a2e; /* Dark theme for the top bar */
+    color: white;
+    padding: 15px 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between logo and text */
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-logo {
+    height: 35px;
+    width: auto;
+}
+
+/* Keep your existing body, .top-bar, .brand, and .nav-logo styles */
+
+/* --- Dropdown Container --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* --- The Clickable Username --- */
+.dropdown-toggle {
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    font-weight: bold;
+}
+
+    .dropdown-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+/* --- The Floating Menu --- */
+.dropdown-menu {
+    display: none; /* Hidden until clicked */
+    position: absolute;
+    right: 0; /* Aligns the menu to the right edge of the button */
+    top: 100%;
+    margin-top: 10px;
+    background-color: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    min-width: 200px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    flex-direction: column;
+    z-index: 9999;
+}
+
+    .dropdown-menu.show {
+        display: flex !important;
+    }
+
+/* --- Menu Items --- */
+.dropdown-item {
+    color: #e0e0e0;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+}
+
+    .dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+
+/* A neat line to separate standard buttons from Log Out */
+.dropdown-divider {
+    height: 1px;
+    background-color: #2a2a4a;
+    margin: 4px 0;
+    margin-top: -10px;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Space between the Welcome text and the Logout button */
+    font-size: 1.1rem;
+}
+
+#logout-btn {
+    background: #e94560; /* A clean red for the logout action */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    #logout-btn:hover {
+        background: #d83a54; /* Slightly darker red on hover */
+    }
+
+.logout-item {
+    color: #e94560; /* Red text */
+    font-weight: bold;
+    background-color: transparent; /* Removes the solid block of color */
+}
+
+    .logout-item:hover {
+        background-color: rgba(233, 69, 96, 0.15); /* Very subtle red glow on hover */
+        color: #ff5c77;
+    }
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .5;
+    }
+}
