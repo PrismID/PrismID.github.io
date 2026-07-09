@@ -293,7 +293,7 @@ if (logoutBtn) {
         signOut(auth).then(() => {
             console.log("Session logged out");
             localStorage.removeItem('onboardingCompleted'); // Clear OASS
-            window.location.href = "index.html";
+            window.location.href = "../index.html";
         }).catch((err) => {
             console.error("Wipe command intercepted an execution exception:", err);
         });
