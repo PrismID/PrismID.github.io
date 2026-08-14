@@ -6,7 +6,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 
 // ==========================================
 // 2. Firebase Connection Credentials
@@ -47,13 +46,15 @@ const projects = [
         url: 'https://whiteboard-wonders.web.app'
     }
 ];
+
 // ==========================================
 // 5. Global DOM Target Cache Locators
 // ==========================================
 const projectsGrid = document.getElementById('projects-grid');
-const welcomeBtn = document.getElementById('welcome-message');
-const dropdownMenu = document.getElementById('dropdown-menu');
-const logoutBtn = document.getElementById('logout-btn');
+const welcomeBtn = document.getElementById('welcome-message') || document.querySelector('.welcome-message');
+const dropdownMenu = document.getElementById('dropdown-menu') || document.querySelector('.dropdown-menu');
+const logoutBtn = document.getElementById('logout-btn') || document.querySelector('.logout-btn');
+
 // ==========================================
 // 6. Form Bindings and Event Interceptors
 // ==========================================
@@ -86,24 +87,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Fake Email for username generator
             const generatedEmail = `${usernameLower}@prismid.com`;
 
             try {
                 console.log(`Registering backend profile identity: ${generatedEmail}`);
 
-                // Phase 1: Authentication Core Registration
                 const userCredential = await createUserWithEmailAndPassword(auth, generatedEmail, password);
                 const user = userCredential.user;
                 console.log("Authentication entity mapped! ID:", user.uid);
 
-                // Phase 2: Create Firestore user entry
                 console.log("Writing user profile registry documentation data...");
                 await setDoc(doc(db, "users", user.uid), {
                     username: usernameLower,
                     displayName: rawUsername,
                     createdAt: new Date().toISOString(),
-                    tutorialCompleted: false // Initialize OASS flag
+                    tutorialCompleted: false
                 });
 
                 console.log("Firestore profile synchronized successfully.");
@@ -153,12 +151,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
 // ==========================================
 // 7. Dynamic App Matrix Generator
 // ==========================================
-
 function generateTempCode() {
-    // Creates a random alphanumeric string (e.g., "7a2b9c4d")
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
@@ -192,15 +189,12 @@ function renderProjects(user) {
                 window.location.href = `LoadingScreen.html?app=${project.id}`;
             };
         } else {
-            // NEW: The Secure Bridge Logic
             card.onclick = async (e) => {
                 e.preventDefault();
 
-                // 1. Generate the ticket
                 const tempCode = generateTempCode();
 
                 try {
-                    // 2. Save it to Firestore with a 60-second expiration
                     await setDoc(doc(db, "bridge_codes", tempCode), {
                         uid: user.uid,
                         targetApp: project.id,
@@ -208,7 +202,6 @@ function renderProjects(user) {
                         expiresAt: new Date().getTime() + 60000
                     });
 
-                    // 3. Send them to the app with the temporary code
                     window.location.href = `${project.url}?code=${tempCode}`;
                 } catch (error) {
                     console.error("Failed to generate bridge code:", error);
@@ -220,9 +213,10 @@ function renderProjects(user) {
         projectsGrid.appendChild(card);
     });
 }
-//===========================================
+
+// ==========================================
 // 8. Onboarding Automatic Saver System (OASS)
-//===========================================
+// ==========================================
 const OASS = {
     async markComplete(uid) {
         await setDoc(doc(db, "users", uid), { tutorialCompleted: true }, { merge: true });
@@ -234,9 +228,7 @@ const OASS = {
 // 9. Session State Observer Lifecycle Guard
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
-    const profileElement = document.getElementById('user-profile');
-    const currentPath = window.location.pathname;
-    const isOnOnboarding = currentPath.includes("dashboard/");
+    const profileElement = document.getElementById('user-profile') || document.querySelector('.user-profile');
 
     if (user) {
         console.log("Active session context mapped:", user.uid);
@@ -249,15 +241,17 @@ onAuthStateChanged(auth, async (user) => {
             if (userDocSnap.exists()) {
                 const userData = userDocSnap.data();
 
-                // FIX: If the user hasn't finished the tutorial, 
-                // we don't redirect. We just show the hidden overlay.
                 if (userData.tutorialCompleted !== true) {
-                    const overlay = document.getElementById('onboarding-overlay');
+                    const overlay = document.getElementById('onboarding-overlay') || document.querySelector('.onboarding-overlay');
                     if (overlay) overlay.classList.remove('hidden');
                 }
 
                 if (welcomeBtn) {
-                    welcomeBtn.innerText = `Welcome, ${userData.displayName}! ▼`;
+                    if (userData.displayName && userData.displayName.toLowerCase() === "prismid") {
+                        welcomeBtn.innerText = "Welcome, Admin! ▼";
+                    } else {
+                        welcomeBtn.innerText = `Welcome, ${userData.displayName || 'User'}! ▼`;
+                    }
                 }
 
                 renderProjects(user);
@@ -292,8 +286,9 @@ if (logoutBtn) {
         e.preventDefault();
         signOut(auth).then(() => {
             console.log("Session logged out");
-            localStorage.removeItem('onboardingCompleted'); // Clear OASS
-            window.location.href = "../index.html";
+            localStorage.removeItem('onboardingCompleted');
+            const redirectPath = window.location.pathname.includes('/dashboard/') || window.location.pathname.includes('/settings/') ? "../index.html" : "index.html";
+            window.location.href = redirectPath;
         }).catch((err) => {
             console.error("Wipe command intercepted an execution exception:", err);
         });
@@ -310,11 +305,10 @@ const nextBtn = document.getElementById('next-btn');
 if (nextBtn) {
     nextBtn.addEventListener('click', async () => {
         const user = auth.currentUser;
-        const overlay = document.getElementById('onboarding-overlay');
+        const overlay = document.getElementById('onboarding-overlay') || document.querySelector('.onboarding-overlay');
 
-        // Logic for the LAST step
         if (currentStep === steps.length - 1) {
-            overlay.classList.add('hidden');
+            if (overlay) overlay.classList.add('hidden');
 
             if (user) {
                 try {
@@ -328,24 +322,15 @@ if (nextBtn) {
             return;
         }
 
-        // Logic for ANIMATING between steps
-        // 1. Fade out current
         steps[currentStep].classList.replace('opacity-100', 'opacity-0');
 
         setTimeout(() => {
-            // 2. Hide current
             steps[currentStep].classList.add('hidden');
-
-            // 3. Increment
             currentStep++;
-
-            // 4. Show next
             steps[currentStep].classList.remove('hidden');
-            // Trigger reflow
             steps[currentStep].offsetWidth;
             steps[currentStep].classList.replace('opacity-0', 'opacity-100');
 
-            // Change button text to "Finish" if we are at the last step
             if (currentStep === steps.length - 1) {
                 nextBtn.innerText = "Finish";
             }
@@ -356,22 +341,14 @@ if (nextBtn) {
 // ==========================================
 // 13. Dropdown Action Controller
 // ==========================================
-
 if (dropdownMenu) {
     dropdownMenu.addEventListener('click', (e) => {
-        // Find the closest element that HAS the data-action attribute
-        const target = e.target.closest('[data-action]');
-
-        // If they clicked something without an action, exit safely
+        const target = e.target.closest('[data-action], #logout-btn');
         if (!target) return;
 
-        e.preventDefault(); // Prevent page reload
-
-        // Now safely get the action and pass it
-        const action = target.getAttribute('data-action');
+        e.preventDefault();
+        const action = target.id === 'logout-btn' ? 'logout' : target.getAttribute('data-action');
         handleMenuAction(action);
-
-        // Close the menu after clicking
         dropdownMenu.classList.remove('show');
     });
 }
@@ -380,15 +357,21 @@ function handleMenuAction(action) {
     switch (action) {
         case 'updates':
             console.log("Action fired: Updates");
-            // TODO: Add your custom UI logic here (e.g., open a modal)
             break;
         case 'security':
             console.log("Action fired: Security");
-            // TODO: Add your custom UI logic here (e.g., open a modal)
             break;
         case 'settings':
-            console.log("Action fired: Settings");
-            // TODO: Add your custom UI logic here (e.g., open a modal)
+            window.location.href = window.location.pathname.includes('/dashboard/') ? "../settings/" : "settings/";
+            break;
+        case 'logout':
+            signOut(auth).then(() => {
+                localStorage.removeItem('onboardingCompleted');
+                const redirectPath = window.location.pathname.includes('/dashboard/') || window.location.pathname.includes('/settings/') ? "../index.html" : "index.html";
+                window.location.href = redirectPath;
+            }).catch((err) => {
+                console.error("Logout failed:", err);
+            });
             break;
         default:
             console.warn("Unknown action:", action);
